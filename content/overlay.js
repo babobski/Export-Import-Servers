@@ -233,7 +233,6 @@ if (!('extensions' in ko)) ko.extensions = {};
 	this.restartKomodo = function() {
 		// Restart Komodo to apply settings
 		Components.utils.import('resource://gre/modules/AddonManager.jsm');
-		console.log(AddonManager);
 		AddonManager.getAddonByID('importServers@babobski.com', function(addon) {
 			addon.uninstall();
 			Components.classes["@mozilla.org/toolkit/app-startup;1"]
@@ -255,17 +254,17 @@ if (!('extensions' in ko)) ko.extensions = {};
 	this._showSuccesScreen = function() {
 		var wenum = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 			.getService(Components.interfaces.nsIWindowWatcher)
-			.getWindowEnumerator();
-		var index = 1;
-		var windowName = "importServers";
+			.getWindowEnumerator(),
+			index = 1,
+			windowName = "importServers";
 		while (wenum.hasMoreElements()) {
 			var win = wenum.getNext();
 			if (win.name == windowName) {
 				win.focus();
 				/** @var winDoc document */
-				var winDoc = win.document;
-				var startScreen = winDoc.getElementById('start');
-				var successScreen = winDoc.getElementById('success');
+				var winDoc = win.document,
+					startScreen = winDoc.getElementById('start'),
+					successScreen = winDoc.getElementById('success');
 
 				startScreen.style.display = 'none';
 				successScreen.style.display = 'block';
@@ -281,17 +280,17 @@ if (!('extensions' in ko)) ko.extensions = {};
 	this._showErrorScreen = function() {
 		var wenum = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 			.getService(Components.interfaces.nsIWindowWatcher)
-			.getWindowEnumerator();
-		var index = 1;
-		var windowName = "importServers";
+			.getWindowEnumerator(),
+			index = 1,
+			windowName = "importServers";
 		while (wenum.hasMoreElements()) {
 			var win = wenum.getNext();
 			if (win.name == windowName) {
 				win.focus();
 				/** @var winDoc document */
-				var winDoc = win.document;
-				var startScreen = winDoc.getElementById('start');
-				var errorScreen = winDoc.getElementById('error');
+				var winDoc = win.document,
+					startScreen = winDoc.getElementById('start'),
+					errorScreen = winDoc.getElementById('error');
 
 				startScreen.style.display = 'none';
 				errorScreen.style.display = 'block';

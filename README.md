@@ -1,6 +1,6 @@
 # Import Servers
 
-Allows you to import you're server settings between major Komodo updates.  
+Allows you to import you're server settings between major Komodo updates (fixes [#2867](https://github.com/Komodo/KomodoEdit/issues/2867)).  
 Compatible with Komodo versions 9 - 11.
 
 ## Instructions
@@ -12,4 +12,3 @@ After making a selection and the imports are successful.
 You will be prompted to remove the addon and restart Komodo (to apply the changes).
 
 ![screenshot](screenshot02.jpg)
-
