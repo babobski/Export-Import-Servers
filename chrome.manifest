@@ -1,2 +1,2 @@
-content importServers content/
-overlay chrome://komodo/content/komodo.xul chrome://importServers/content/overlay.xul
+content ExportImportServers content/
+overlay chrome://komodo/content/komodo.xul chrome://ExportImportServers/content/overlay.xul

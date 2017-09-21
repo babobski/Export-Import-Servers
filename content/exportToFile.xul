@@ -2,11 +2,10 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
 <window
-    id="ExportImportServers-window"
-    title="Import Servers"
+    id="ExportToFile-window"
+    title="Import Servers To File"
     orient="horizontal"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script type="text/javascript" src="chrome://ExportImportServers/content/importServers.js"></script>
 	<script type="application/javascript">
 		var self = window.arguments[0],
 			extensions = self.extensions;
@@ -21,10 +20,10 @@
 	</script>
 	<hbox id="start">
 		<description flex="1">
-			Select the Komodo version from where you want to import the server settings from.
+			Select the directory where you want to export you're server settings to.
 		</description>
 		<vbox id="buttonBox" flex="1">
-			
+			<button id="exportToFile" onclick="extensions.ExportImportServers._preformActualExporttoFile()" label="Select directory" />
 		</vbox>
 	</hbox>
 	<hbox id="success" style="display: none; width: 100%;">

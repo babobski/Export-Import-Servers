@@ -3,7 +3,7 @@
 	 xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 	<Description about="urn:mozilla:install-manifest">
 		<em:unpack>true</em:unpack>
-		<em:id>importServers@babobski.com</em:id>
+		<em:id>ExportImportServers@babobski.com</em:id>
 		<em:name>Import Servers</em:name>
 		<em:version>1.0.0</em:version>
 		<em:description>Allows you to import you're server settings from a other Komodo version Ko 9.* - 11.*</em:description>

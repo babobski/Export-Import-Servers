@@ -2,7 +2,7 @@
  * Namespaces
  */
 if (typeof(extensions) === 'undefined') extensions = {};
-if (typeof(extensions.importServers) === 'undefined') extensions.importServers = {
+if (typeof(extensions.ExportImportServers) === 'undefined') extensions.ExportImportServers = {
 	version: '1.0.0'
 };
 
@@ -10,6 +10,7 @@ if (!('extensions' in ko)) ko.extensions = {};
 
 (function() {
 	const DEBUG = false;
+	const { classes: Cc, interfaces: Ci } = Components;
 	var self = this;
 	
 	/**
@@ -152,7 +153,24 @@ if (!('extensions' in ko)) ko.extensions = {};
 			versionsEDIT: installedVersionsEdit,
 			currentVersion: currVersion(),
 		};
-		window.openDialog('chrome://importServers/content/importServers.xul', "importServers", features, windowVars);
+		window.openDialog('chrome://ExportImportServers/content/importServers.xul', "importServers", features, windowVars);
+	};
+	
+	this.exportToFile = function() {
+		console.log('exporting');
+		 var features = "chrome,titlebar,toolbar,centerscreen,resizable,modal";
+		 var windowVars = {
+		 	extensions: extensions,
+		 };
+		 window.openDialog('chrome://ExportImportServers/content/exportToFile.xul', "exportToFile", features, windowVars);
+	};
+	
+	this.importFromFile = function() {
+		 var features = "chrome,titlebar,toolbar,centerscreen,resizable,modal";
+		 var windowVars = {
+		 	extensions: extensions,
+		 };
+		 window.openDialog('chrome://ExportImportServers/content/importFromFile.xul', "importFromFile", features, windowVars);
 	};
 
 	/**
@@ -219,12 +237,16 @@ if (!('extensions' in ko)) ko.extensions = {};
 			}
 
 			if (copiedKey3 && copiedLogins) { // Files are imported time to restart Komodo
-				self._showSuccesScreen();
+				self._showSuccesScreen('importServers');
 			} else { // Something went wrong show manual instructions
-				self._showErrorScreen();
+				self._showErrorScreen('importServers');
 			}
 
 		}
+	};
+	
+	this._preformActualExporttoFile = function() {
+		
 	};
 
 	/**
@@ -233,7 +255,7 @@ if (!('extensions' in ko)) ko.extensions = {};
 	this.restartKomodo = function() {
 		// Restart Komodo to apply settings
 		Components.utils.import('resource://gre/modules/AddonManager.jsm');
-		AddonManager.getAddonByID('importServers@babobski.com', function(addon) {
+		AddonManager.getAddonByID('ExportImportServers@babobski.com', function(addon) {
 			addon.uninstall();
 			Components.classes["@mozilla.org/toolkit/app-startup;1"]
 			.getService(Components.interfaces.nsIAppStartup)
@@ -251,12 +273,12 @@ if (!('extensions' in ko)) ko.extensions = {};
 	/**
 	 * Show success screen if imports are successful
 	 */
-	this._showSuccesScreen = function() {
+	this._showSuccesScreen = function(windowName) {
 		var wenum = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 			.getService(Components.interfaces.nsIWindowWatcher)
 			.getWindowEnumerator(),
-			index = 1,
-			windowName = "importServers";
+			index = 1;
+			//windowName = "importServers";
 		while (wenum.hasMoreElements()) {
 			var win = wenum.getNext();
 			if (win.name == windowName) {
@@ -277,12 +299,12 @@ if (!('extensions' in ko)) ko.extensions = {};
 	/**
 	 * Show Error screen when imports fails
 	 */
-	this._showErrorScreen = function() {
+	this._showErrorScreen = function(windowName) {
 		var wenum = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 			.getService(Components.interfaces.nsIWindowWatcher)
 			.getWindowEnumerator(),
-			index = 1,
-			windowName = "importServers";
+			index = 1;
+			//windowName = "importServers";
 		while (wenum.hasMoreElements()) {
 			var win = wenum.getNext();
 			if (win.name == windowName) {
@@ -303,6 +325,6 @@ if (!('extensions' in ko)) ko.extensions = {};
 	/**
 	 * Show Dialog on start-up
 	 */
-	window.addEventListener('komodo-post-startup', self.importServersFromOtherVersion);
+	//window.addEventListener('komodo-post-startup', self.importServersFromOtherVersion);
 
-}).apply(extensions.importServers);
+}).apply(extensions.ExportImportServers);

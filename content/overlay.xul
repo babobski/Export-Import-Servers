@@ -1,5 +1,34 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<overlay id="importServers" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script type="application/x-javascript" src="chrome://importServers/content/overlay.js" />
+<overlay id="ExportImportServers" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/x-javascript" src="chrome://ExportImportServers/content/overlay.js" />
+	
+	<commandset id="allcommands">
+		<command id="Tasks:ExportImportServers_from_ko" oncommand="extensions.ExportImportServers.importServersFromOtherVersion();"/>
+		<command id="Tasks:ExportImportServers_from_file" oncommand="extensions.ExportImportServers.importFromFile();"/>
+		<command id="Tasks:ExportImportServers_to_file" oncommand="extensions.ExportImportServers.exportToFile();"/>
+	</commandset>
+	
+	<menupopup id="popup_tools">
+		<menu id="menu_ExportImportServers" label="Export Import Servers">
+			<menupopup id="menu_ExportImportServers_popup">
+				<menu id="menu_ExportImportServers_import" label="Import Servers">
+					<menupopup id="menu_ExportImportServers_import_popup">
+						<menuitem id="menu_ExportImportServers_import_from_file"
+								  label="Import from file"
+								  observes="Tasks:ExportImportServers_from_file"
+								  class="menu-iconic-wide" />
+						<menuitem id="menu_ExportImportServers_import_from_ko"
+								  label="Import from other Komodo install"
+								  observes="Tasks:ExportImportServers_from_ko"
+								  class="menu-iconic-wide" />
+					</menupopup>
+				</menu>
+				<menuitem id="menu_ExportImportServers_export"
+						  label="Export to file"
+						  observes="Tasks:ExportImportServers_to_file"
+						  class="menu-iconic-wide" />
+			</menupopup>
+		</menu>
+	</menupopup>
 </overlay>
 
