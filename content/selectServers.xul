@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<window id="selectServers-window"
+		title="Select servers"
+		orient="horizontal"
+		width="700"
+		height="600"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="text/javascript" src="chrome://ExportImportServers/content/selectServers.js"></script>
+	<script type="application/javascript">
+		var self = window.arguments[0],
+			extensions = self.extensions;
+	</script>
+	<vbox flex="1">
+		<toolbox>
+			<toolbar>
+				<toolbarbutton id="importServer" onclick="" label="Import selected servers" />
+				<toolbarbutton id="exportServers" onclick="" label="Export selected servers" />
+			</toolbar>
+		</toolbox>
+		<tree>
+			<treecols>
+				<treecol label="Selected" type="checkbox" editable="true" />
+				<treecol label="Alias" flex="1" />
+				<treecol label="Hostname" flex="1" />
+				<treecol label="Username" flex="1" />
+				<treecol label="Protocol" flex="1" />
+			</treecols>
+		
+			<treechildren id="serverList">
+				
+			</treechildren>
+		</tree>
+	</vbox>
+</window>

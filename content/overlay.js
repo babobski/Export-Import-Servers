@@ -8,6 +8,9 @@ if (typeof(extensions.ExportImportServers) === 'undefined') extensions.ExportImp
 
 if (!('extensions' in ko)) ko.extensions = {};
 
+// Load KoHelper
+xtk.load('chrome://ExportImportServers/content/koHelper.js');
+
 (function() {
 	const DEBUG = false;
 	const { classes: Cc, interfaces: Ci } = Components;
@@ -245,8 +248,84 @@ if (!('extensions' in ko)) ko.extensions = {};
 		}
 	};
 	
-	this._preformActualExporttoFile = function() {
+	this._preformActualExporttoFile = function() { // TODO Rename
 		
+		var RCService = Components.classes["@activestate.com/koRemoteConnectionService;1"].
+                    getService(Components.interfaces.koIRemoteConnectionService);
+		var server_count = {};
+		var servers = RCService.getServerInfoList(server_count);
+		var processedServers = self._procesServerSettings(servers);
+		
+		if (processedServers.length > 0) {
+			
+			self._closeScreen('exportToFile');
+			
+			var features = "chrome,titlebar,toolbar,centerscreen,resizable,modal";
+			var windowVars = {
+				extensions: extensions,
+				servers: processedServers,
+				type: 'export',
+			};
+			window.openDialog('chrome://ExportImportServers/content/selectServers.xul', "selectServers", features, windowVars);
+		}
+		
+	};
+	
+	this._exportToFile = function(servers) {
+		if (servers.length > 0) {
+			// Ask for loacation to store the file
+			var fakeEl = document.createElement('textbox');
+			ko.filepicker.browseForDir(fakeEl);
+			
+			var fileLocation = fakeEl.value;
+			if (fileLocation.length > 0) {
+				var fileContent = self._procesServerSettings(servers);
+				koXI.storeObj(fileLocation, 'serverSettings.conf', fileContent); // TODO check if file exists
+			} else {
+				// No file location is selected
+			}
+		} else {
+			// No servers to export
+		}
+	};
+	
+	this._preformActualImportFromFile = function() {
+		
+		var RCService = Components.classes["@activestate.com/koRemoteConnectionService;1"].
+                    getService(Components.interfaces.koIRemoteConnectionService);
+		var server_count = {};
+		var servers = RCService.getServerInfoList(server_count);
+		var processedServers = self._procesServerSettings(servers);
+		var skipped = 0;
+		
+		var importFile = ko.filepicker.browseForFile();
+		
+		self._closeScreen('importFromFile');
+		
+		if (importFile.length > 0) {
+			console.log(importFile);
+			var serversToImport = koXI.readObj(importFile);
+			if (serversToImport.length > 0) {
+				for (var i = 0; i < serversToImport.length; i++) {
+					var serverToImport = serversToImport[i];
+					if (! self._inServerList(processedServers, serverToImport)) {
+						console.log('importing');
+						var serverInfo = Components.classes["@activestate.com/koServerInfo;1"].
+						createInstance(Components.interfaces.koIServerInfo);
+						serverInfo.init(null, serverToImport.protocol, serverToImport.alias, serverToImport.hostname, serverToImport.port, serverToImport.username, serverToImport.password, serverToImport.path, serverToImport.passive, serverToImport.privatekey);
+						servers.push(serverInfo);
+					} else {
+						// skipped
+						skipped++;
+					}
+				}
+			}
+			
+			RCService.saveServerInfoList(servers.length, servers);
+			
+			console.log(serversToImport);
+			console.log(skipped);
+		}
 	};
 
 	/**
@@ -269,6 +348,59 @@ if (!('extensions' in ko)) ko.extensions = {};
 	this.openManualInstructions = function() {
 		ko.browse.openUrlInDefaultBrowser('https://community.komodoide.com/t/komodo-edit-10-doesnt-migrate-remote-servers-from-ke-9/2715/4');
 	};
+	
+	this._inServerList = function(serverList, server) {
+		var exist = false;
+		for (var i = 0; i < serverList.length; i++) {
+			var installedServer = serverList[i];
+			
+			if (installedServer.alias === server.alias) {
+				exist = true;
+			}
+			if (installedServer.hostname === server.hostname && installedServer.username === server.username) {
+				exist = true;
+			}
+		}
+		
+		return exist;
+	};
+	
+	this._procesServerSettings = function(serverList) {
+		var output = [];
+		for (var i = 0; i < serverList.length; i++) {
+			var server = serverList[i];
+			var newConfiguration = {};
+			
+			newConfiguration.alias 		= server.alias;
+			newConfiguration.hostname 	= server.hostname;
+			newConfiguration.passive	= server.passive;
+			newConfiguration.password	= server.password;
+			newConfiguration.path		= server.path;
+			newConfiguration.port		= server.port;
+			newConfiguration.privatekey	= server.privatekey;
+			newConfiguration.protocol	= server.protocol;
+			newConfiguration.username	= server.username;
+			
+			output.push(newConfiguration);
+		}
+		return output;
+	};
+	
+	this._closeScreen = function(windowName) {
+		var wenum = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+			.getService(Components.interfaces.nsIWindowWatcher)
+			.getWindowEnumerator(),
+			index = 1;
+			//windowName = "importServers";
+		while (wenum.hasMoreElements()) {
+			var win = wenum.getNext();
+			if (win.name == windowName) {
+				win.close();
+				return;
+			}
+			index++;
+		}
+	}
 
 	/**
 	 * Show success screen if imports are successful
