@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<dialog id="showNotification-window"
+		title="Notification"
+		class="modal"
+		buttons="accept"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/javascript">
+		var self 		= window.arguments[0],
+			type 		= self.type,
+			message 	= self.message;
+			
+		
+		function loadNotification() {
+			var success 	= document.getElementById('success'),
+				error 		= document.getElementById('error'),
+				desc 		= document.getElementById('notificationDesc');
+			
+			if (type === 'error') {
+				success.style.display = 'none';
+			} else {
+				error.style.display = 'none';
+			}
+			
+			desc.innerHTML = message;
+		}	
+		
+		window.addEventListener('DOMContentLoaded', loadNotification);
+	</script>
+		<hbox flex="1" style="text-align: center;">
+			<image id="success" align="center" flex="1" width="100" height="100" src="chrome://ExportImportServers/content/images/success.svg" />
+			<image id="error" align="center" flex="1" width="100" height="100" src="chrome://ExportImportServers/content/images/error.svg" />
+		</hbox>
+		<hbox flex="1">
+			<description id="notificationDesc" flex="1" class="header" style="padding: 10px 5px; text-align: center;">
+				...
+			</description>
+		</hbox>
+</dialog>

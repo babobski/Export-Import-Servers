@@ -5,32 +5,38 @@
 		title="Select servers"
 		orient="horizontal"
 		width="700"
-		height="600"
+		hidechrome="true"
+		minheight="500"
+		sizemode="normal"
+		windowtype="popup"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script type="text/javascript" src="chrome://ExportImportServers/content/selectServers.js"></script>
-	<script type="application/javascript">
-		var self = window.arguments[0],
-			extensions = self.extensions;
-	</script>
 	<vbox flex="1">
 		<toolbox>
 			<toolbar>
-				<toolbarbutton id="importServer" onclick="" label="Import selected servers" />
-				<toolbarbutton id="exportServers" onclick="" label="Export selected servers" />
+				<toolbarbutton id="importServer" onclick="preformImport();" label="Import selected servers" />
+				<toolbarbutton id="exportServers" onclick="preformExport();" label="Export selected servers" />
+				<toolbarbutton id="exportServers" onclick="window.close();" label="Close" />
 			</toolbar>
 		</toolbox>
-		<tree>
-			<treecols>
+		<tree editable="true" hidecolumnpicker="true"> 
+			<treecols id="serverColls" editable="true">
 				<treecol label="Selected" type="checkbox" editable="true" />
-				<treecol label="Alias" flex="1" />
-				<treecol label="Hostname" flex="1" />
-				<treecol label="Username" flex="1" />
-				<treecol label="Protocol" flex="1" />
+				<treecol label="Alias" flex="1" editable="true" />
+				<treecol label="Hostname" flex="1" editable="false" />
+				<treecol label="Username" flex="1" editable="false" />
+				<treecol label="Protocol" flex="1" editable="false" />
 			</treecols>
 		
 			<treechildren id="serverList">
 				
 			</treechildren>
 		</tree>
+		<description style="padding: 10px 5px;">
+			Note: You can edit the Alias field.
+		</description>
 	</vbox>
+	<tooltip id="serverExist" orient="horizontal">
+		<label value="This server already exist"/>
+	</tooltip>
 </window>

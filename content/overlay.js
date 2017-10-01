@@ -14,257 +14,57 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 (function() {
 	const DEBUG = false;
 	const { classes: Cc, interfaces: Ci } = Components;
-	var self = this;
-	
-	/**
-	 * Import Servers From a Other Komodo Version
-	 * @description Import server settings from different Komodo versions IDE/Edit Ko9 - Ko11
-	 */
-	this.importServersFromOtherVersion = function() {
-		Components.utils.import("resource://gre/modules/FileUtils.jsm");
-
-		// get the "key3.db" file in the profile directory
-		var file = FileUtils.getFile("ProfD", ["key3.db"]),
-			base = file.parent,
-			currPath = base.path;
-
-		// Ko Versions install folders to test
-		var koVersions = [
-				'11.0', // TEST only
-				'10.2',
-				'10.1',
-				'10.0',
-				'9.3',
-				'9.2',
-				'9.1',
-				'9.0',
-				'8.5',
-				'8.0',
-				'7.1',
-				'7.0',
-			],
-			isIDE = currPath.indexOf('KomodoIDE') !== -1,
-			currVersion = function() {
-				$currVersion = null;
-				for (var i = 0; i < koVersions.length; i++) {
-					if (ko.version.indexOf(koVersions[i]) !== -1) {
-						$currVersion = koVersions[i];
-					}
-				}
-				if (DEBUG) {
-					console.log('Current version:' + $currVersion);
-				}
-				return $currVersion;
-			},
-			basePath = currPath.substr(0, currPath.indexOf(currVersion())),
-			filePath = currPath.substr((currPath.indexOf(currVersion()) + currVersion().length), currPath.length),
-			installedVersionsIDE = [],
-			installedVersionsEdit = [],
-			OSPathSeperator = Services.appinfo.OS === 'WINNT' ? '\\' : '/';
-
-		// Test if the files exist
-		for (var e = 0; e < koVersions.length; e++) {
-			var testPath = basePath + koVersions[e] + filePath,
-				otherTestPath = isIDE ? testPath.replace('KomodoIDE', 'KomodoEdit') : testPath.replace('KomodoEdit', 'KomodoIDE'),
-				key3Leaf = OSPathSeperator + 'key3.db',
-				loginsLeaf = OSPathSeperator + 'logins.json',
-				key3Exist = false,
-				loginsExist = false,
-				otherKey3Exist = false,
-				otherLoginsExist = false;
-
-
-			// Test if key3.db exist in same type (IDE/Edit)
-			try {
-				var testFile = new FileUtils.File(testPath + key3Leaf);
-				if (testFile.isFile()) {
-					key3Exist = true;
-				}
-			} catch (e) {
-				if (DEBUG) {
-					console.log('File dos not exist: ' + testPath + key3Leaf);
-				}
-			}
-
-			// Test if key3.db exist in other type (IDE/Edit)
-			try {
-				var otherTestFile = new FileUtils.File(otherTestPath + key3Leaf);
-				if (otherTestFile.isFile()) {
-					otherKey3Exist = true;
-				}
-			} catch (e) {
-				if (DEBUG) {
-					console.log('File dos not exist: ' + otherTestPath + key3Leaf);
-				}
-			}
-
-			// Test if logins.json exist in same type (IDE/Edit)
-			try {
-				var testFileLogins = new FileUtils.File(testPath + loginsLeaf);
-				if (testFileLogins.isFile()) {
-					loginsExist = true;
-				}
-			} catch (e) {
-				if (DEBUG) {
-					console.log('File dos not exist: ' + testPath + loginsLeaf);
-				}
-			}
-
-			// Test if logins.json exist in other type (IDE/Edit)
-			try {
-				var otherTestFileLogins = new FileUtils.File(otherTestPath + loginsLeaf);
-				if (otherTestFileLogins.isFile()) {
-					otherLoginsExist = true;
-				}
-			} catch (e) {
-				if (DEBUG) {
-					console.log('File dos not exist: ' + otherTestPath + loginsLeaf);
-				}
-			}
-
-			// Add version if both files exist and skip current install
-			if (key3Exist && loginsExist && currVersion() !== koVersions[e]) {
-				var val = {
-					version: koVersions[e],
-					type: isIDE ? 'KomodoIDE' : 'KomodoEdit',
-				};
-				if (isIDE) {
-					installedVersionsIDE.push(val);
-				} else {
-					installedVersionsEdit.push(val);
-				}
-			}
-
-			// Add version if both files exist
-			if (otherKey3Exist && otherLoginsExist) {
-				var otherVal = {
-					version: koVersions[e],
-					type: !isIDE ? 'KomodoIDE' : 'KomodoEdit',
-				};
-				if (!isIDE) {
-					installedVersionsIDE.push(otherVal);
-				} else {
-					installedVersionsEdit.push(otherVal);
-				}
-			}
-		}
-
-		var features = "chrome,titlebar,toolbar,centerscreen,resizable,modal";
-		var windowVars = {
-			extensions: extensions,
-			versionsIDE: installedVersionsIDE,
-			versionsEDIT: installedVersionsEdit,
-			currentVersion: currVersion(),
-		};
-		window.openDialog('chrome://ExportImportServers/content/importServers.xul', "importServers", features, windowVars);
-	};
+	var self 		= this,
+		RCService 	= Components.classes["@activestate.com/koRemoteConnectionService;1"].
+                    getService(Components.interfaces.koIRemoteConnectionService);
 	
 	this.exportToFile = function() {
-		console.log('exporting');
-		 var features = "chrome,titlebar,toolbar,centerscreen,resizable,modal";
-		 var windowVars = {
-		 	extensions: extensions,
-		 };
-		 window.openDialog('chrome://ExportImportServers/content/exportToFile.xul', "exportToFile", features, windowVars);
+		var server_count 		= {};
+		var servers 			= RCService.getServerInfoList(server_count);
+		var processedServers 	= self._procesServerSettings(servers);
+		
+		self._preformActualExportOrImportToFile('export', processedServers);
 	};
 	
 	this.importFromFile = function() {
-		 var features = "chrome,titlebar,toolbar,centerscreen,resizable,modal";
-		 var windowVars = {
-		 	extensions: extensions,
-		 };
-		 window.openDialog('chrome://ExportImportServers/content/importFromFile.xul', "importFromFile", features, windowVars);
-	};
-
-	/**
-	 * Preform actual import for the server settings
-	 * 
-	 * @param   {string} this           Version number to install from
-	 * @param   {string} currentVersion Version to import the settings to
-	 * @param   {string} type           If IDE or Edit
-	 * 
-	 */
-	this.preformImportServers = function(version, currentVersion, type) {
-		Components.utils.import("resource://gre/modules/FileUtils.jsm");
-		var file = FileUtils.getFile("ProfD", ["key3.db"]),
-			logins = FileUtils.getFile("ProfD", ["logins.json"]);
-
-		if (file !== 'undefined') {
-			var currPath = file.path,
-				isIDE = currPath.indexOf('KomodoIDE') !== -1,
-				fileDir = file.parent,
-				loginsPath = logins.path,
-				basePath = currPath.substr(0, currPath.indexOf(currentVersion)),
-				filePath = currPath.substr((currPath.indexOf(currentVersion) + currentVersion.length), currPath.length),
-				testPath = basePath + version + filePath,
-				finalTestPath = isIDE && type === 'KomodoIDE' ? testPath : (isIDE && type !== 'KomodoIDE' ? testPath.replace('KomodoIDE', 'KomodoEdit') : (!isIDE && type == 'KomodoEdit' ? testPath : testPath.replace('KomodoEdit', 'KomodoIDE'))),
-				basePathLogins = loginsPath.substr(0, loginsPath.indexOf(currentVersion)),
-				filePathLogins = loginsPath.substr((loginsPath.indexOf(currentVersion) + currentVersion.length), loginsPath.length),
-				testPathLogins = basePathLogins + version + filePathLogins,
-				finalTestPathLogins = isIDE && type === 'KomodoIDE' ? testPathLogins : (isIDE && type !== 'KomodoIDE' ? testPathLogins.replace('KomodoIDE', 'KomodoEdit') : (!isIDE && type == 'KomodoEdit' ? testPathLogins : testPathLogins.replace('KomodoEdit', 'KomodoIDE'))),
-				copiedKey3 = false,
-				copiedLogins = false;
-
-			// Copy key3 to current install
-			try {
-				var testFile = new FileUtils.File(finalTestPath);
-				if (testFile.isFile()) {
-					testFile.copyTo(fileDir, 'key3.db');
-					copiedKey3 = true;
-					if (DEBUG) {
-						console.log('copied key3.db');
+		var server_count 		= {};
+		var servers 			= RCService.getServerInfoList(server_count);
+		var processedServers 	= self._procesServerSettings(servers);
+		var importFile 			= ko.filepicker.browseForFile();
+		var ipmortServers 		= [];
+		var skip				= [];
+		
+		if (importFile.length > 0) {
+			
+			console.log(importFile);
+			var serversToImport = koXI.readObj(importFile);
+			if (serversToImport.length > 0) {
+				for (var i = 0; i < serversToImport.length; i++) {
+					var serverToImport 	= serversToImport[i],
+						serverInfo 		= Components.classes["@activestate.com/koServerInfo;1"].
+						createInstance(Components.interfaces.koIServerInfo);
+					
+					serverInfo.init(null, serverToImport.protocol, serverToImport.alias, serverToImport.hostname, serverToImport.port, serverToImport.username, serverToImport.password, serverToImport.path, serverToImport.passive, serverToImport.privatekey);
+					ipmortServers.push(serverInfo);
+					
+					if (self._inServerList(processedServers, serverToImport)) {
+						skip.push(serverToImport.alias);
 					}
 				}
-			} catch (e) {
-				if (DEBUG) {
-					console.log('File dos not exist: ' + finalTestPath);
-					console.log(e);
-				}
+				self._preformActualExportOrImportToFile('import', ipmortServers, skip);
 			}
-
-			// Copy logins to current install
-			try {
-				var testFileLogins = new FileUtils.File(finalTestPathLogins);
-				if (testFileLogins.isFile()) {
-					testFileLogins.copyTo(fileDir, 'logins.json');
-					copiedLogins = true;
-					if (DEBUG) {
-						console.log('copied logins.json');
-					}
-				}
-			} catch (e) {
-				if (DEBUG) {
-					console.log('File dos not exist: ' + finalTestPathLogins);
-					console.log(e);
-				}
-			}
-
-			if (copiedKey3 && copiedLogins) { // Files are imported time to restart Komodo
-				self._showSuccesScreen('importServers');
-			} else { // Something went wrong show manual instructions
-				self._showErrorScreen('importServers');
-			}
-
 		}
 	};
 	
-	this._preformActualExporttoFile = function() { // TODO Rename
+	this._preformActualExportOrImportToFile = function(type, servers, skip = []) {
 		
-		var RCService = Components.classes["@activestate.com/koRemoteConnectionService;1"].
-                    getService(Components.interfaces.koIRemoteConnectionService);
-		var server_count = {};
-		var servers = RCService.getServerInfoList(server_count);
-		var processedServers = self._procesServerSettings(servers);
-		
-		if (processedServers.length > 0) {
-			
-			self._closeScreen('exportToFile');
-			
+		if (servers.length > 0) {
 			var features = "chrome,titlebar,toolbar,centerscreen,resizable,modal";
 			var windowVars = {
 				extensions: extensions,
-				servers: processedServers,
-				type: 'export',
+				servers: servers,
+				type: type,
+				skip: skip,
 			};
 			window.openDialog('chrome://ExportImportServers/content/selectServers.xul', "selectServers", features, windowVars);
 		}
@@ -273,13 +73,20 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 	
 	this._exportToFile = function(servers) {
 		if (servers.length > 0) {
+			var serversToExport = [];
+			for (var i = 0; i < servers.length; i++) {
+				var serverToExport = servers[i];
+				if (serverToExport.checked === 'true') {
+					serversToExport.push(serverToExport);
+				}
+			}
 			// Ask for loacation to store the file
 			var fakeEl = document.createElement('textbox');
 			ko.filepicker.browseForDir(fakeEl);
 			
 			var fileLocation = fakeEl.value;
 			if (fileLocation.length > 0) {
-				var fileContent = self._procesServerSettings(servers);
+				var fileContent = self._procesServerSettings(serversToExport);
 				koXI.storeObj(fileLocation, 'serverSettings.conf', fileContent); // TODO check if file exists
 			} else {
 				// No file location is selected
@@ -289,87 +96,40 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 		}
 	};
 	
-	this._preformActualImportFromFile = function() {
+	this._importFromFile = function(serversToImport) {
+		var RCService 			= Components.classes["@activestate.com/koRemoteConnectionService;1"].
+								getService(Components.interfaces.koIRemoteConnectionService);
+		var server_count 		= {};
+		var servers 			= RCService.getServerInfoList(server_count);
+		var imported			= 0;
 		
-		var RCService = Components.classes["@activestate.com/koRemoteConnectionService;1"].
-                    getService(Components.interfaces.koIRemoteConnectionService);
-		var server_count = {};
-		var servers = RCService.getServerInfoList(server_count);
-		var processedServers = self._procesServerSettings(servers);
-		var skipped = 0;
 		
-		var importFile = ko.filepicker.browseForFile();
-		
-		self._closeScreen('importFromFile');
-		
-		if (importFile.length > 0) {
-			console.log(importFile);
-			var serversToImport = koXI.readObj(importFile);
-			if (serversToImport.length > 0) {
-				for (var i = 0; i < serversToImport.length; i++) {
-					var serverToImport = serversToImport[i];
-					if (! self._inServerList(processedServers, serverToImport)) {
-						console.log('importing');
-						var serverInfo = Components.classes["@activestate.com/koServerInfo;1"].
-						createInstance(Components.interfaces.koIServerInfo);
-						serverInfo.init(null, serverToImport.protocol, serverToImport.alias, serverToImport.hostname, serverToImport.port, serverToImport.username, serverToImport.password, serverToImport.path, serverToImport.passive, serverToImport.privatekey);
-						servers.push(serverInfo);
-					} else {
-						// skipped
-						skipped++;
-					}
+		if (serversToImport.length > 0) {
+			for (var i = 0; i < serversToImport.length; i++) {
+				var serverToImport 	= serversToImport[i],
+					serverInfo 		= Components.classes["@activestate.com/koServerInfo;1"].
+					createInstance(Components.interfaces.koIServerInfo);
+				if (serverToImport.checked === 'true') {
+					serverInfo.init(null, serverToImport.protocol, serverToImport.alias, serverToImport.hostname, serverToImport.port, serverToImport.username, serverToImport.password, serverToImport.path, serverToImport.passive, serverToImport.privatekey);
+					servers.push(serverInfo);
+					imported++;
 				}
 			}
 			
-			RCService.saveServerInfoList(servers.length, servers);
-			
-			console.log(serversToImport);
-			console.log(skipped);
-		}
-	};
-
-	/**
-	 * Remove addon and restart Komodo to apply settings
-	 */
-	this.restartKomodo = function() {
-		// Restart Komodo to apply settings
-		Components.utils.import('resource://gre/modules/AddonManager.jsm');
-		AddonManager.getAddonByID('ExportImportServers@babobski.com', function(addon) {
-			addon.uninstall();
-			Components.classes["@mozilla.org/toolkit/app-startup;1"]
-			.getService(Components.interfaces.nsIAppStartup)
-			.quit(Components.interfaces.nsIAppStartup.eRestart | Components.interfaces.nsIAppStartup.eAttemptQuit);
-		});
-	};
-
-	/**
-	 * If import fails offer manual instructions 
-	 */
-	this.openManualInstructions = function() {
-		ko.browse.openUrlInDefaultBrowser('https://community.komodoide.com/t/komodo-edit-10-doesnt-migrate-remote-servers-from-ke-9/2715/4');
-	};
-	
-	this._inServerList = function(serverList, server) {
-		var exist = false;
-		for (var i = 0; i < serverList.length; i++) {
-			var installedServer = serverList[i];
-			
-			if (installedServer.alias === server.alias) {
-				exist = true;
-			}
-			if (installedServer.hostname === server.hostname && installedServer.username === server.username) {
-				exist = true;
+			if (imported > 0) {
+				RCService.saveServerInfoList(servers.length, servers);
+				self.showNotification('success', 'Successfully imported ' + imported + (imported > 1 ? ' servers.' : ' server.'));
+			} else {
+				self.showNotification('error', 'Nothing to import.');
 			}
 		}
-		
-		return exist;
 	};
 	
 	this._procesServerSettings = function(serverList) {
 		var output = [];
 		for (var i = 0; i < serverList.length; i++) {
-			var server = serverList[i];
-			var newConfiguration = {};
+			var server 				= serverList[i];
+			var newConfiguration 	= {};
 			
 			newConfiguration.alias 		= server.alias;
 			newConfiguration.hostname 	= server.hostname;
@@ -386,12 +146,28 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 		return output;
 	};
 	
+	this._inServerList = function(serverList, server) {
+		var exist = false;
+		for (var i = 0; i < serverList.length; i++) {
+			var installedServer = serverList[i];
+
+			if (installedServer.alias === server.alias) {
+				exist = true;
+			}
+			if (installedServer.hostname === server.hostname && installedServer.username === server.username) {
+				exist = true;
+			}
+		}
+
+		return exist;
+	};
+	
 	this._closeScreen = function(windowName) {
 		var wenum = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 			.getService(Components.interfaces.nsIWindowWatcher)
 			.getWindowEnumerator(),
 			index = 1;
-			//windowName = "importServers";
+			
 		while (wenum.hasMoreElements()) {
 			var win = wenum.getNext();
 			if (win.name == windowName) {
@@ -400,63 +176,16 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 			}
 			index++;
 		}
-	}
-
-	/**
-	 * Show success screen if imports are successful
-	 */
-	this._showSuccesScreen = function(windowName) {
-		var wenum = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-			.getService(Components.interfaces.nsIWindowWatcher)
-			.getWindowEnumerator(),
-			index = 1;
-			//windowName = "importServers";
-		while (wenum.hasMoreElements()) {
-			var win = wenum.getNext();
-			if (win.name == windowName) {
-				win.focus();
-				/** @var winDoc document */
-				var winDoc = win.document,
-					startScreen = winDoc.getElementById('start'),
-					successScreen = winDoc.getElementById('success');
-
-				startScreen.style.display = 'none';
-				successScreen.style.display = 'block';
-				return;
-			}
-			index++;
-		}
 	};
 	
-	/**
-	 * Show Error screen when imports fails
-	 */
-	this._showErrorScreen = function(windowName) {
-		var wenum = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-			.getService(Components.interfaces.nsIWindowWatcher)
-			.getWindowEnumerator(),
-			index = 1;
-			//windowName = "importServers";
-		while (wenum.hasMoreElements()) {
-			var win = wenum.getNext();
-			if (win.name == windowName) {
-				win.focus();
-				/** @var winDoc document */
-				var winDoc = win.document,
-					startScreen = winDoc.getElementById('start'),
-					errorScreen = winDoc.getElementById('error');
-
-				startScreen.style.display = 'none';
-				errorScreen.style.display = 'block';
-				return;
-			}
-			index++;
-		}
+	this.showNotification = function(type, message) {
+		var features = "chrome,titlebar,toolbar,centerscreen,resizable,modal";
+		var windowVars = {
+			extensions: extensions,
+			type: type,
+			message: message,
+		};
+		window.openDialog('chrome://ExportImportServers/content/notification.xul', "ImpExpNotification", features, windowVars);
 	};
-	
-	/**
-	 * Show Dialog on start-up
-	 */
-	//window.addEventListener('komodo-post-startup', self.importServersFromOtherVersion);
 
 }).apply(extensions.ExportImportServers);
