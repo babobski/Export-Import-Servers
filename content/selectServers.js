@@ -12,19 +12,19 @@ function buildList() {
 		list.innerHTML = '';
 		
 	if (type === 'import') {
-		var existColl = document.createElement('treecol');
-		var colls = document.getElementById('serverColls');
+		var existColl 	= document.createElement('treecol'),
+			colls 		= document.getElementById('serverColls');
 		
 		existColl.setAttribute('flex', '1');
-		existColl.setAttribute('label', 'Exist');
+		existColl.setAttribute('label', 'Already Exist');
 		
 		colls.appendChild(existColl);
 	}
 	
 	for (var i = 0; i < servers.length; i++) {
-		var newItem 	= document.createElement('treeitem');
-		var treerow 	= document.createElement('treerow');
-		var selectCell 	= document.createElement('treecell');
+		var newItem 	= document.createElement('treeitem'),
+			treerow 	= document.createElement('treerow'),
+			selectCell 	= document.createElement('treecell');
 		
 		newItem.setAttribute('data-passive', servers[i].passive);
 		newItem.setAttribute('data-password', servers[i].password);
@@ -34,10 +34,10 @@ function buildList() {
 		
 		selectCell.setAttribute('value', (skip.indexOf(servers[i].alias) == -1));
 		
-		var aliasCell 		= document.createElement('treecell');
-		var hostnameCell 	= document.createElement('treecell');
-		var usernameCell 	= document.createElement('treecell');
-		var protocolCell 	= document.createElement('treecell');
+		var aliasCell 		= document.createElement('treecell'),
+			hostnameCell 	= document.createElement('treecell'),
+			usernameCell 	= document.createElement('treecell'),
+			protocolCell 	= document.createElement('treecell');
 		
 		if (skip.indexOf(servers[i].alias) !== -1) {
 			selectCell.setAttribute('editable', 'false');
@@ -91,35 +91,39 @@ function buildView() {
 
 function preformImport() {
 	serversToImport = getServerList();
-	console.log(serversToImport);
 	if (serversToImport.length > 0) {
 		extensions.ExportImportServers._importFromFile(serversToImport);
+		return false;
 	}
+	extensions.ExportImportServers._closeScreen('selectServers');
+	extensions.ExportImportServers.showNotification('error', 'Nothing to import.');
 }
 
 function preformExport() {
 	serversToImport = getServerList();
-	console.log(serversToImport);
 	if (serversToImport.length > 0) {
 		extensions.ExportImportServers._exportToFile(serversToImport);
+		return false;
 	}
+	extensions.ExportImportServers._closeScreen('selectServers');
+	extensions.ExportImportServers.showNotification('error', 'Nothing to export.');
 }
 
 function getServerList() {
-	var list = document.getElementById('serverList');
-	var listItems = list.children;
-	var outpuList = [];
+	var list 		= document.getElementById('serverList');
+	var listItems 	= list.children;
+	var outpuList 	= [];
 	
 	for (var i = 0; i < listItems.length; i++) {
-		var row = listItems[i].children[0];
-		var cells = row.children;
-		var serverInfo = {};
+		var row 		= listItems[i].children[0];
+		var cells 		= row.children;
+		var serverInfo 	= {};
 		
-		serverInfo.passive = listItems[i].getAttribute('data-passive');
-		serverInfo.password = listItems[i].getAttribute('data-password');
-		serverInfo.path = listItems[i].getAttribute('data-path');
-		serverInfo.port = listItems[i].getAttribute('data-port');
-		serverInfo.privatekey = listItems[i].getAttribute('data-passive');
+		serverInfo.passive 		= listItems[i].getAttribute('data-passive');
+		serverInfo.password 	= listItems[i].getAttribute('data-password');
+		serverInfo.path 		= listItems[i].getAttribute('data-path');
+		serverInfo.port 		= listItems[i].getAttribute('data-port');
+		serverInfo.privatekey 	= listItems[i].getAttribute('data-passive');
 		
 		for (var e = 0; e < cells.length; e++) {
 			switch (e) {

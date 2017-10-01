@@ -3,7 +3,7 @@
  */
 if (typeof(extensions) === 'undefined') extensions = {};
 if (typeof(extensions.ExportImportServers) === 'undefined') extensions.ExportImportServers = {
-	version: '1.0.0'
+	version: '1.1.0'
 };
 
 if (!('extensions' in ko)) ko.extensions = {};
@@ -12,31 +12,33 @@ if (!('extensions' in ko)) ko.extensions = {};
 xtk.load('chrome://ExportImportServers/content/koHelper.js');
 
 (function() {
-	const DEBUG = false;
-	const { classes: Cc, interfaces: Ci } = Components;
 	var self 		= this,
 		RCService 	= Components.classes["@activestate.com/koRemoteConnectionService;1"].
                     getService(Components.interfaces.koIRemoteConnectionService);
 	
 	this.exportToFile = function() {
-		var server_count 		= {};
-		var servers 			= RCService.getServerInfoList(server_count);
-		var processedServers 	= self._procesServerSettings(servers);
+		var server_count 		= {},
+			servers 			= RCService.getServerInfoList(server_count),
+			processedServers 	= self._procesServerSettings(servers);
 		
-		self._preformActualExportOrImportToFile('export', processedServers);
+		if (processedServers.length > 0) {
+			self._preformActualExportOrImportToFile('export', processedServers);
+			return false;
+		}
+		self.showNotification('error', 'Nothing to export.');
 	};
 	
 	this.importFromFile = function() {
-		var server_count 		= {};
-		var servers 			= RCService.getServerInfoList(server_count);
-		var processedServers 	= self._procesServerSettings(servers);
-		var importFile 			= ko.filepicker.browseForFile();
-		var ipmortServers 		= [];
-		var skip				= [];
+		var server_count 		= {},
+			servers 			= RCService.getServerInfoList(server_count),
+			processedServers 	= self._procesServerSettings(servers),
+			importFile 			= ko.filepicker.browseForFile(),
+			ipmortServers 		= [],
+			skip				= [];
 		
 		if (importFile.length > 0) {
 			
-			console.log(importFile);
+			
 			var serversToImport = koXI.readObj(importFile);
 			if (serversToImport.length > 0) {
 				for (var i = 0; i < serversToImport.length; i++) {
@@ -51,6 +53,10 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 						skip.push(serverToImport.alias);
 					}
 				}
+				if (skip.length === serversToImport.length) {
+					self.showNotification('error', 'Nothing to import, all servers already exist.');
+					return false;
+				} 
 				self._preformActualExportOrImportToFile('import', ipmortServers, skip);
 			}
 		}
@@ -59,8 +65,8 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 	this._preformActualExportOrImportToFile = function(type, servers, skip = []) {
 		
 		if (servers.length > 0) {
-			var features = "chrome,titlebar,toolbar,centerscreen,resizable,modal";
-			var windowVars = {
+			var features = "chrome,titlebar,toolbar,centerscreen,resizable,modal",
+				windowVars = {
 				extensions: extensions,
 				servers: servers,
 				type: type,
@@ -98,10 +104,10 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 	
 	this._importFromFile = function(serversToImport) {
 		var RCService 			= Components.classes["@activestate.com/koRemoteConnectionService;1"].
-								getService(Components.interfaces.koIRemoteConnectionService);
-		var server_count 		= {};
-		var servers 			= RCService.getServerInfoList(server_count);
-		var imported			= 0;
+								getService(Components.interfaces.koIRemoteConnectionService),
+			server_count 		= {},
+			servers 			= RCService.getServerInfoList(server_count),
+			imported			= 0;
 		
 		
 		if (serversToImport.length > 0) {
@@ -118,8 +124,10 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 			
 			if (imported > 0) {
 				RCService.saveServerInfoList(servers.length, servers);
+				self._closeScreen('selectServers');
 				self.showNotification('success', 'Successfully imported ' + imported + (imported > 1 ? ' servers.' : ' server.'));
 			} else {
+				self._closeScreen('selectServers');
 				self.showNotification('error', 'Nothing to import.');
 			}
 		}
@@ -128,8 +136,8 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 	this._procesServerSettings = function(serverList) {
 		var output = [];
 		for (var i = 0; i < serverList.length; i++) {
-			var server 				= serverList[i];
-			var newConfiguration 	= {};
+			var server 				= serverList[i],
+				newConfiguration 	= {};
 			
 			newConfiguration.alias 		= server.alias;
 			newConfiguration.hostname 	= server.hostname;
@@ -178,12 +186,13 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 		}
 	};
 	
-	this.showNotification = function(type, message) {
-		var features = "chrome,titlebar,toolbar,centerscreen,resizable,modal";
-		var windowVars = {
+	this.showNotification = function(type, message, callback) {
+		var features 	= "chrome,titlebar,toolbar,centerscreen,resizable,modal",
+			windowVars 	= {
 			extensions: extensions,
 			type: type,
 			message: message,
+			callback: callback,
 		};
 		window.openDialog('chrome://ExportImportServers/content/notification.xul', "ImpExpNotification", features, windowVars);
 	};
