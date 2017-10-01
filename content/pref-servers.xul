@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<overlay id="ExportImportServers-server-frefs" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/x-javascript" src="chrome://ExportImportServers/content/overlay.js" />
+	<script type="application/x-javascript" src="chrome://ExportImportServers/content/prefServers.js" />
+</overlay>
+

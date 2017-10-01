@@ -16,19 +16,26 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 		RCService 	= Components.classes["@activestate.com/koRemoteConnectionService;1"].
                     getService(Components.interfaces.koIRemoteConnectionService);
 	
-	this.exportToFile = function() {
+	this.exportToFile = function(closePrefScreen = false) {
 		var server_count 		= {},
 			servers 			= RCService.getServerInfoList(server_count),
 			processedServers 	= self._procesServerSettings(servers);
 		
 		if (processedServers.length > 0) {
 			self._preformActualExportOrImportToFile('export', processedServers);
+			if (closePrefScreen) {
+				self._closePrefScreen();
+			}
 			return false;
 		}
 		self.showNotification('error', 'Nothing to export.');
+		if (closePrefScreen) {
+			self._closePrefScreen();
+		}
 	};
 	
-	this.importFromFile = function() {
+	this.importFromFile = function(closePrefScreen = false) {
+			
 		var server_count 		= {},
 			servers 			= RCService.getServerInfoList(server_count),
 			processedServers 	= self._procesServerSettings(servers),
@@ -36,7 +43,7 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 			ipmortServers 		= [],
 			skip				= [];
 		
-		if (importFile.length > 0) {
+		if (importFile !== null) {
 			
 			
 			var serversToImport = koXI.readObj(importFile);
@@ -55,9 +62,15 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 				}
 				if (skip.length === serversToImport.length) {
 					self.showNotification('error', 'Nothing to import, all servers already exist.');
+					if (closePrefScreen) {
+						self._closePrefScreen();
+					}
 					return false;
 				} 
 				self._preformActualExportOrImportToFile('import', ipmortServers, skip);
+				if (closePrefScreen) {
+					self._closePrefScreen();
+				}
 			}
 		}
 	};
@@ -179,6 +192,22 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 		while (wenum.hasMoreElements()) {
 			var win = wenum.getNext();
 			if (win.name == windowName) {
+				win.close();
+				return;
+			}
+			index++;
+		}
+	};
+	
+	this._closePrefScreen = function() {
+		var wenum = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+			.getService(Components.interfaces.nsIWindowWatcher)
+			.getWindowEnumerator(),
+			index = 1;
+			
+		while (wenum.hasMoreElements()) {
+			var win = wenum.getNext();
+			if (win.document !== null && win.document.title === 'Preferences') {
 				win.close();
 				return;
 			}
