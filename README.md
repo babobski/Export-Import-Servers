@@ -42,4 +42,14 @@ Or error:
 
 ![error](screenshot07.jpg)
 
+## Accessibility
+
+The import and export function also available through the Tools menu:
+
+![error](screenshot08.jpg)
+
+## Roadmap
+
+ * Encrypt/decrypt passwords
+ * check if file already exist ( it now overwites the file )
 
