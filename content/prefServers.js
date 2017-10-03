@@ -6,8 +6,8 @@ function loadButtons() {
 		var importBtn = document.createElement('button');
 		var exportBtn = document.createElement('button');
 		
-		importBtn.setAttribute('label', 'Import Servers');
-		exportBtn.setAttribute('label', 'Export Servers');
+		importBtn.setAttribute('label', 'Import');
+		exportBtn.setAttribute('label', 'Export');
 		importBtn.setAttribute('onclick', 'extensions.ExportImportServers.importFromFile(true);');
 		exportBtn.setAttribute('onclick', 'extensions.ExportImportServers.exportToFile(true);');
 		

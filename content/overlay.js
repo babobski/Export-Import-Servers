@@ -8,13 +8,13 @@ if (typeof(extensions.ExportImportServers) === 'undefined') extensions.ExportImp
 
 if (!('extensions' in ko)) ko.extensions = {};
 
-// Load KoHelper
+// Helpers
 xtk.load('chrome://ExportImportServers/content/koHelper.js');
 
 (function() {
-	var self 		= this,
-		RCService 	= Components.classes["@activestate.com/koRemoteConnectionService;1"].
-                    getService(Components.interfaces.koIRemoteConnectionService);
+	var self 			= this,
+		RCService 		= Components.classes["@activestate.com/koRemoteConnectionService;1"].
+						getService(Components.interfaces.koIRemoteConnectionService);
 	
 	this.exportToFile = function(closePrefScreen = false) {
 		var server_count 		= {},
@@ -99,20 +99,31 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 					serversToExport.push(serverToExport);
 				}
 			}
-			// Ask for loacation to store the file
-			var fakeEl = document.createElement('textbox');
-			ko.filepicker.browseForDir(fakeEl);
 			
-			var fileLocation = fakeEl.value;
-			if (fileLocation.length > 0) {
-				var fileContent = self._procesServerSettings(serversToExport);
-				koXI.storeObj(fileLocation, 'serverSettings.conf', fileContent); // TODO check if file exists
+			if (serversToExport.length > 0) {
+				// Ask for loacation to store the file
+				var fakeEl = document.createElement('textbox');
+				var totalCount = serversToExport.length;
+				ko.filepicker.browseForDir(fakeEl);
+				
+				
+				var fileLocation = fakeEl.value;
+				if (fileLocation.length > 0) {
+					var fileContent = self._procesServerSettings(serversToExport);
+					koXI.storeObj(fileLocation, 'serverSettings.conf', fileContent); // TODO check if file exists
+					self._closeScreen('selectServers');
+					self.showNotification('success', 'Successfully exported ' + totalCount + (totalCount > 1 ? ' servers' : ' server') + '.');
+				} else {
+					// No file location is selected
+					self._closeScreen('selectServers');
+					self.showNotification('error', 'No location selected.');
+				}
 			} else {
-				// No file location is selected
+				// No servers selected
+				self._closeScreen('selectServers');
+				self.showNotification('error', 'Nothing to export.');
 			}
-		} else {
-			// No servers to export
-		}
+		} 
 	};
 	
 	this._importFromFile = function(serversToImport) {
@@ -151,7 +162,7 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 		for (var i = 0; i < serverList.length; i++) {
 			var server 				= serverList[i],
 				newConfiguration 	= {};
-			
+				
 			newConfiguration.alias 		= server.alias;
 			newConfiguration.hostname 	= server.hostname;
 			newConfiguration.passive	= server.passive;

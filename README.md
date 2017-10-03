@@ -3,14 +3,28 @@
 This addon allows you to easily transfer you're server setting between different computers and platforms.
 
 ## Export to file
-This function allows you to export you're server settings to a file.  
-You first be prompted witch servers you want to export (Note you edit the server alias in this screen).  
+This function allows you to export you're server settings to a file.
+
+![export button](screenshot.jpg)
+
+You first be prompted which servers you want to export (Note you edit the server alias in this screen).
+
+![select servers](screenshot01.jpg)
+
 When you're done you can click the "Export selected servers" button to export the server settings.  
-You will be prompted about where you want to store the file.
+You will be prompted about where you want to store the file.  
+After you selected the location, you will be prompted about a successful import or a error.
+
+![success](screenshot02.jpg)
+
+Or error:
+
+![success](screenshot03.jpg)
+
 
 ## Import from file
 This function allows you to import you're server settings from a file.  
 You first be prompted for the file to import you're server settings from.
-After that you will be prompted witch servers you want to export (Note you edit the server alias in this screen).
+After that you will be prompted which servers you want to export (Note you edit the server alias in this screen).
 When you're done you can click the "Import selected servers" button to export the server settings.  
 

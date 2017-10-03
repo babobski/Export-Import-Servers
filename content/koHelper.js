@@ -10,6 +10,8 @@ var notify = require("notify/notify");
 var koFile = require("ko/file");
 var uri = ko.uriparse;
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 var CC = Components.classes;
 var CI = Components.interfaces;
 
@@ -93,7 +95,7 @@ koXI.storeContent = function(folderName, fileName, content) {
 	createFileIfNotExist(file);
 	koXI.saveFile(file, content);
 	return;
-}
+};
 
 /**
  * Read content from a file in the users profile folder.
@@ -109,7 +111,7 @@ koXI.readContent = function(folderName, fileName) {
 	var fileContent = koXI.readFile(file);
 	
 	return fileContent;
-}
+};
 
 /**
  * Store a object in the user profile folder.
