@@ -13,7 +13,7 @@ You first be prompted which servers you want to export (Note you edit the server
 
 When you're done you can click the "Export selected servers" button to export the server settings.  
 You will be prompted about where you want to store the file.  
-After you selected the location, you will be prompted about a successful import or a error.
+After you selected the location, you will be prompted about a successful export or a error.
 
 ![success](screenshot02.jpg)
 
@@ -23,8 +23,23 @@ Or error:
 
 
 ## Import from file
-This function allows you to import you're server settings from a file.  
-You first be prompted for the file to import you're server settings from.
-After that you will be prompted which servers you want to export (Note you edit the server alias in this screen).
+This function allows you to import you're server settings from a file.
+
+![import button](screenshot04.jpg)
+
+You first be prompted for the file to import you're server settings from.    
+After that you will be prompted which servers you want to export (Note you edit the server alias in this screen).  
+You can only import server that not already exist.
+
+![select servers](screenshot05.jpg)
+
 When you're done you can click the "Import selected servers" button to export the server settings.  
+After that you will be prompted about a successful import or a error.
+
+![success](screenshot06.jpg)
+
+Or error:
+
+![error](screenshot07.jpg)
+
 
