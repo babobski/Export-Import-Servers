@@ -1,7 +1,7 @@
 
 function loadButtons() {
 	var addUpdateBtn = document.getElementById('buttonAdd');
-	var serverSelect = document.getElementById('serversList');
+	var serverSelect = document.getElementById('serversPopup');
 	
 	if (addUpdateBtn !== null) {
 		var importBtn = document.createElement('button');
@@ -10,17 +10,18 @@ function loadButtons() {
 		importBtn.setAttribute('onclick', 'extensions.ExportImportServers.importFromFile(true);');
 		
 		addUpdateBtn.parentNode.insertBefore(importBtn, addUpdateBtn);
-		
-		if (serverSelect.itemCount > 0) {
+		console.log(serverSelect);
+		console.log(serverSelect.childElementCount);
+		if (serverSelect.childElementCount > 0) {
 			var exportBtn = document.createElement('button');
-			
+			console.log('in here');
 			exportBtn.setAttribute('label', 'Export');
 			exportBtn.setAttribute('onclick', 'extensions.ExportImportServers.exportToFile(true);');
 			
-			addUpdateBtn.parentNode.insertBefore(exportBtn, addUpdateBtn);
+			addUpdateBtn.parentNode.insertBefore(exportBtn, importBtn);
 		}
 	}
 }
 
 
-window.addEventListener('DOMContentLoaded', loadButtons);
+window.addEventListener('load', loadButtons);
