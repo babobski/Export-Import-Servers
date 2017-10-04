@@ -10,11 +10,8 @@ function loadButtons() {
 		importBtn.setAttribute('onclick', 'extensions.ExportImportServers.importFromFile(true);');
 		
 		addUpdateBtn.parentNode.insertBefore(importBtn, addUpdateBtn);
-		console.log(serverSelect);
-		console.log(serverSelect.childElementCount);
-		if (serverSelect.childElementCount > 0) {
+		if (serverSelect.childElementCount > 0) { 
 			var exportBtn = document.createElement('button');
-			console.log('in here');
 			exportBtn.setAttribute('label', 'Export');
 			exportBtn.setAttribute('onclick', 'extensions.ExportImportServers.exportToFile(true);');
 			
