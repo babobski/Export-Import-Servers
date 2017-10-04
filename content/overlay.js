@@ -3,7 +3,7 @@
  */
 if (typeof(extensions) === 'undefined') extensions = {};
 if (typeof(extensions.ExportImportServers) === 'undefined') extensions.ExportImportServers = {
-	version: '1.1.2'
+	version: '1.1.3'
 };
 
 if (!('extensions' in ko)) ko.extensions = {};
