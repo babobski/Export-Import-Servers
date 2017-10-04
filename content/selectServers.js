@@ -101,7 +101,6 @@ function preformImport() {
 
 function preformExport() {
 	serversToImport = getServerList();
-	console.log(serversToImport);
 	if (serversToImport.length > 0) {
 		extensions.ExportImportServers._exportToFile(serversToImport);
 		return false;

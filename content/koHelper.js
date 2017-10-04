@@ -4,21 +4,24 @@
  * @version 1.0
  */
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
+//var CC = Components.classes;
+//var CI = Components.interfaces;
+//
+//CC["@mozilla.org/moz/jssubscript-loader;1"]
+//  .getService(CI.mozIJSSubScriptLoader)
+//  .loadSubScript("chrome://komodo/content/jetpack.js", this);
 
 var koXI = {};
 var notify = require("notify/notify");
-var koFile = require("ko/file");
-var uri = ko.uriparse;
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-
-var CC = Components.classes;
-var CI = Components.interfaces;
-
-function createFileIfNotExist($url) {
+koXI.createFileIfNotExist = function($url) {
+	var koFile = require("ko/file");
+	var patIO = require("sdk/fs/path");
 	if (!koFile.exists($url)) {
-		var path = uri.dirName($url);
-		var fileName = uri.baseName($url);
+		var path = patIO.dirname($url);
+		var fileName = patIO.basename($url);
 		
 		koFile.mkpath(path);
 		koFile.create(path, fileName);  
@@ -92,7 +95,7 @@ koXI.storeContent = function(folderName, fileName, content) {
 	var OSSep = Services.appinfo.OS === 'WINNT' ? '\\' : '/';
 	var file = folderName + OSSep + fileName;
 	
-	createFileIfNotExist(file);
+	koXI.createFileIfNotExist(file);
 	koXI.saveFile(file, content);
 	return;
 };
@@ -127,10 +130,9 @@ koXI.storeObj = function(folderName, fileName, obj) {
 	
 	var OSSep = Services.appinfo.OS === 'WINNT' ? '\\' : '/';
 	var file = folderName + OSSep + fileName;
-	console.log(obj);
 	var fileContent = '{ "content": ' + JSON.stringify(obj) + '}';
 	
-	createFileIfNotExist(file);
+	koXI.createFileIfNotExist(file);
 	koXI.saveFile(file, fileContent);
 	return;
 };
@@ -157,17 +159,6 @@ koXI.readObj = function(file) {
 	obj = JSON.parse(fileContent);
 	
 	return obj.content;
-};
-
-/**
- * Returns a parsed url
- * 
- * @param   {string} url url to parse
- * 
- * @returns {string} parsed url
- */
-koXI.URI = function(url) {
-	return ko.uriparse.displayPath(url);
 };
 
 /**
