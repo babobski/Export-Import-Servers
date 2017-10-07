@@ -31,6 +31,7 @@ function buildList() {
 		newItem.setAttribute('data-path', servers[i].path);
 		newItem.setAttribute('data-port', servers[i].port);
 		newItem.setAttribute('data-privatekey', servers[i].privatekey);
+		newItem.setAttribute('data-raw', servers[i].raw_hostdata);
 		
 		selectCell.setAttribute('value', (skip.indexOf(servers[i].alias) == -1));
 		
@@ -124,6 +125,7 @@ function getServerList() {
 		serverInfo.path 		= listItems[i].getAttribute('data-path');
 		serverInfo.port 		= listItems[i].getAttribute('data-port');
 		serverInfo.privatekey 	= listItems[i].getAttribute('data-passive');
+		serverInfo.raw_hostdata = listItems[i].getAttribute('data-raw');
 		
 		for (var e = 0; e < cells.length; e++) {
 			switch (e) {

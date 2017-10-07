@@ -3,7 +3,7 @@
  */
 if (typeof(extensions) === 'undefined') extensions = {};
 if (typeof(extensions.ExportImportServers) === 'undefined') extensions.ExportImportServers = {
-	version: '1.1.3'
+	version: '1.1.4'
 };
 
 if (!('extensions' in ko)) ko.extensions = {};
@@ -140,7 +140,7 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 					serverInfo 		= Components.classes["@activestate.com/koServerInfo;1"].
 					createInstance(Components.interfaces.koIServerInfo);
 				if (serverToImport.checked === 'true') {
-					serverInfo.init(null, serverToImport.protocol, serverToImport.alias, serverToImport.hostname, serverToImport.port, serverToImport.username, serverToImport.password, serverToImport.path, serverToImport.passive, serverToImport.privatekey);
+					serverInfo.init(null, serverToImport.protocol, serverToImport.alias, serverToImport.hostname, serverToImport.port, serverToImport.username, serverToImport.password, serverToImport.path, (serverToImport.passive ? 1 : 0), '', serverToImport.raw_hostdata);
 					servers.push(serverInfo);
 					imported++;
 				}
@@ -148,6 +148,8 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 			
 			if (imported > 0) {
 				RCService.saveServerInfoList(servers.length, servers);
+				RCService.clearConnectionCache();
+				
 				self._closeScreen('selectServers');
 				self.showNotification('success', 'Successfully imported ' + imported + (imported > 1 ? ' servers.' : ' server.'));
 			} else {
@@ -163,15 +165,16 @@ xtk.load('chrome://ExportImportServers/content/koHelper.js');
 			var server 				= serverList[i],
 				newConfiguration 	= {};
 				
-			newConfiguration.alias 		= server.alias;
-			newConfiguration.hostname 	= server.hostname;
-			newConfiguration.passive	= server.passive;
-			newConfiguration.password	= server.password;
-			newConfiguration.path		= server.path;
-			newConfiguration.port		= server.port;
-			newConfiguration.privatekey	= server.privatekey;
-			newConfiguration.protocol	= server.protocol;
-			newConfiguration.username	= server.username;
+			newConfiguration.alias 			= server.alias;
+			newConfiguration.hostname 		= server.hostname;
+			newConfiguration.passive		= server.passive;
+			newConfiguration.password		= server.password;
+			newConfiguration.path			= server.path;
+			newConfiguration.port			= server.port;
+			newConfiguration.privatekey		= server.privatekey;
+			newConfiguration.protocol		= server.protocol;
+			newConfiguration.username		= server.username;
+			newConfiguration.raw_hostdata	= server.raw_hostdata;
 			
 			output.push(newConfiguration);
 		}
